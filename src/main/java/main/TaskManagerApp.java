@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -19,6 +21,7 @@ import javafx.stage.Stage;
 
 public class TaskManagerApp extends Application
 {
+    private ImageView logoImageView;
     private ObservableList<Task> tasks;
     private ListView<Task> taskListView;
     
@@ -29,6 +32,17 @@ public class TaskManagerApp extends Application
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Task Manager");
+        
+        // Load image logo
+        Image logoImage = new Image("file:src/main/resources/appImages/taskAppLogoImage.jpg");
+        
+        // Set the application icon
+        primaryStage.getIcons().add(logoImage);
+        
+        // Create the ImageView
+        logoImageView = new ImageView(logoImage);
+        logoImageView.setFitHeight(50);
+        logoImageView.setFitWidth(50);
         
         tasks = FXCollections.observableArrayList();
         taskListView = new ListView<>(tasks);
