@@ -12,13 +12,6 @@ public class Task
         this.setDescription(description);
         this.setCompleted(false); // Defaults to false since a task is not completed upon creating
     }
-    
-    public String toString() {
-        String completedStatus = completed ? "Yes!" : "Not Yet!";
-        return "Task: " + title +
-                " | Description: " + description +
-                " | Completed? " + completedStatus;
-    }
 
     public String getTitle ()
     {
