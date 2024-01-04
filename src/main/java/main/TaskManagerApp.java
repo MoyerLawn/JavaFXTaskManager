@@ -10,8 +10,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -23,12 +25,13 @@ public class TaskManagerApp extends Application
 {
     private ImageView logoImageView;
     private ObservableList<Task> tasks;
-    private ListView<Task> taskListView;
+    private TableView<Task> taskTableView;
     
     public static void main(String[] args) {
         launch(args);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Task Manager");
@@ -45,7 +48,25 @@ public class TaskManagerApp extends Application
         logoImageView.setFitWidth(50);
         
         tasks = FXCollections.observableArrayList();
-        taskListView = new ListView<>(tasks);
+        taskTableView = new TableView<>(tasks);
+
+        TableColumn<Task, String> titleColumn = new TableColumn<>("Title");
+        TableColumn<Task, String> descriptionColumn = new TableColumn<>("Description");
+        TableColumn<Task, Boolean> completedColumn = new TableColumn<>("Completed");
+
+        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
+
+        taskTableView.getColumns().addAll(titleColumn, descriptionColumn, completedColumn);
+
+        // Set column resize policy
+        taskTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // Adjust column widths proportionally
+        titleColumn.prefWidthProperty().bind(taskTableView.widthProperty().multiply(0.33));
+        descriptionColumn.prefWidthProperty().bind(taskTableView.widthProperty().multiply(0.33));
+        completedColumn.prefWidthProperty().bind(taskTableView.widthProperty().multiply(0.33));
         
         TextField titleTextField = new TextField();
         titleTextField.setPromptText("Task Title");
@@ -67,7 +88,7 @@ public class TaskManagerApp extends Application
         buttonBox.getChildren().addAll(addButton, deleteButton, markCompletedButton);
         
         VBox layout = new VBox(10);
-        layout.getChildren().addAll(titleTextField, descriptionTextField, buttonBox, taskListView);
+        layout.getChildren().addAll(taskTableView, titleTextField, descriptionTextField, buttonBox);
         
         // Set margin for the scene's root (StackPane in this case)
         StackPane root = new StackPane(layout);
@@ -79,8 +100,17 @@ public class TaskManagerApp extends Application
     }
     
     public void addTask(String title, String description) {
+        // First check if either the title or description given is blank
+        if (title.trim().isEmpty() || description.trim().isEmpty()) {
+            showWarning("Title or description cannot be blank.");
+            return;
+        }
+        
         // Check if a task already exists with the title
-        boolean titleExists = tasks.stream().anyMatch(task -> task.getTitle().equalsIgnoreCase(title));
+        boolean titleExists = tasks.stream()
+                .anyMatch(task -> task.getTitle().equalsIgnoreCase(title)
+                        && task.getDescription().equalsIgnoreCase(description));
+
         
         if (titleExists) {
             // Prompt user to confirm if they do/don't want to add another task
@@ -97,18 +127,17 @@ public class TaskManagerApp extends Application
     }
     
     public void markTaskAsCompleted() {
-        Task selectedTask = taskListView.getSelectionModel().getSelectedItem();
+        Task selectedTask = taskTableView.getSelectionModel().getSelectedItem();
         if (selectedTask != null) {
             selectedTask.setCompleted(true);
-            taskListView.refresh();
+            taskTableView.refresh();
         }
     }
     
     public void deleteTask() {
-        Task selectedTask = taskListView.getSelectionModel().getSelectedItem();
+        Task selectedTask = taskTableView.getSelectionModel().getSelectedItem();
         if (selectedTask != null) {
             tasks.remove(selectedTask);
-            taskListView.refresh();
         }
     }
     
@@ -120,5 +149,13 @@ public class TaskManagerApp extends Application
         
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
+    }
+    
+    private void showWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
