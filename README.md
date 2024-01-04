@@ -16,8 +16,6 @@ A simple task manager application built using JavaFX.
 
 This JavaFX Task Manager application is a simple task management tool that allows users to add, mark as completed, and delete tasks. It provides a user-friendly graphical interface to manage tasks efficiently.
 
-![Task Manager Screenshot](screenshots/task_manager_screenshot.png)
-
 ## Features
 
 - **Add Task:** Add new tasks with a title and optional description.
