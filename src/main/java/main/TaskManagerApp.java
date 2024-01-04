@@ -125,6 +125,10 @@ public class TaskManagerApp extends Application
 
         Scene scene = new Scene(root, 500, 500);
         primaryStage.setScene(scene);
+        
+        //Lock the window size to a set minimum if decreasing
+        primaryStage.setMinHeight(400);
+        primaryStage.setMinWidth(400);
     }
     
     public void addTask(String title, String description) {
