@@ -23,6 +23,7 @@ This JavaFX Task Manager application is a simple task management tool that allow
 - **Add Task:** Add new tasks with a title and optional description.
 - **Mark as Completed:** Mark tasks as completed to keep track of your progress.
 - **Delete Task:** Remove tasks that are no longer needed.
+- **Clear All Tasks** Removes all tasks that are currently listed.
 
 ## Technologies Used
 
@@ -57,7 +58,3 @@ Contributions are welcome! Feel free to open issues or pull requests to improve 
 3. Commit your changes: `git commit -m 'Add new feature'`
 4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
