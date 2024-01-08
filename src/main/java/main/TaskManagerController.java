@@ -72,26 +72,21 @@ public class TaskManagerController
     }
     
     private boolean promptToAddAnotherTask() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Task Exists!");
-        alert.setHeaderText("A task with the same title already exists.");
-        alert.setContentText("Do you want to add another task with the same title?");
-        
-        ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
-        alert.getButtonTypes().setAll(yesButton, noButton);
-        
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == yesButton;
+        return showConfirmationAlert("Task Exists!", "A task with the same title already exists.",
+                "Do you want to add another task with the same title?");
+    }
+
+    private boolean promptToClearAllTasks() {
+        return showConfirmationAlert("Clear All Tasks", "You are about to delete all tasks listed.",
+                "Do you want to delete all tasks?");
     }
     
-    private boolean promptToClearAllTasks() {
+    private boolean showConfirmationAlert(String title, String headerText, String contentText) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Clear All Tasks");
-        alert.setHeaderText("You are about to delete all tasks listed.");
-        alert.setContentText("Do you want to delete all tasks?");
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.setContentText(contentText);
 
-        // Customize button labels
         ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
         alert.getButtonTypes().setAll(yesButton, noButton);
@@ -99,7 +94,6 @@ public class TaskManagerController
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == yesButton;
     }
-
     
     private void showWarning(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
