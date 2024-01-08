@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 
 public class TaskManagerController
 {
@@ -18,7 +19,7 @@ public class TaskManagerController
         this.taskTableView = taskTableView;
     }
 
-    public void addTask(String title, String description) {
+    public void addTask(String title, String description, TextField titleTextField, TextField descriptionTextField) {
         // First check if either the title or description given is blank
         if (title.trim().isEmpty() || description.trim().isEmpty()) {
             showWarning("Title or description cannot be blank.");
@@ -43,6 +44,10 @@ public class TaskManagerController
         // User had decided to add another task with the same name or no task with that name exists
         Task task = new Task(title, description);
         tasks.add(task);
+        
+        // Clear out the title and description fields after entry has been made
+        titleTextField.clear();
+        descriptionTextField.clear();
     }
     
     public void markTaskAsCompleted() {

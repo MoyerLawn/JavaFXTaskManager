@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "title": "Clean my room",
+    "description": "Vacuum and Dust",
+    "completed": false
+  }
+]
