@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Optional;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -15,12 +14,11 @@ import com.google.gson.reflect.TypeToken;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -37,6 +35,8 @@ public class TaskManagerApp extends Application
     private ImageView logoImageView;
     private ObservableList<Task> tasks;
     private TableView<Task> taskTableView;
+    private TaskManagerController controller;
+    private static final String TASKS_FILE_NAME = "tasks.json";
     
     public static void main(String[] args) {
         launch(args);
@@ -45,13 +45,14 @@ public class TaskManagerApp extends Application
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Task List");
-        primaryStage.setOnCloseRequest(event -> saveTasksToFile("tasks.json"));
+        primaryStage.setOnCloseRequest(event -> saveTasksToFile(TASKS_FILE_NAME));
         
         loadTasksFromFile();
         initializeLogo(primaryStage);
         initializeTableColumns();
         initializeTextButtonsAndView(primaryStage);
         
+        controller = new TaskManagerController(tasks, taskTableView);
         
         primaryStage.show();
     }
@@ -71,7 +72,6 @@ public class TaskManagerApp extends Application
     
     @SuppressWarnings("unchecked")
     private void initializeTableColumns() {
-        //tasks = FXCollections.observableArrayList();
         taskTableView = new TableView<>(tasks);
 
         TableColumn<Task, String> titleColumn = new TableColumn<>("Title");
@@ -100,17 +100,10 @@ public class TaskManagerApp extends Application
         TextField descriptionTextField = new TextField();
         descriptionTextField.setPromptText("Task Description");
         
-        Button addButton = new Button("Add Task");
-        addButton.setOnAction(e -> addTask(titleTextField.getText(), descriptionTextField.getText()));
-
-        Button deleteButton = new Button("Delete Task");
-        deleteButton.setOnAction(e -> deleteTask());
-        
-        Button markCompletedButton = new Button("Mark as Completed");
-        markCompletedButton.setOnAction(e -> markTaskAsCompleted());
-        
-        Button clearAllButton = new Button("Clear All Tasks");
-        clearAllButton.setOnAction(e -> clearAllTasks());
+        Button addButton = createButton("Add Task", e -> controller.addTask(titleTextField.getText(), descriptionTextField.getText()));
+        Button deleteButton = createButton("Delete Task", e -> controller.deleteTask());
+        Button markCompletedButton = createButton("Mark as Completed", e -> controller.markTaskAsCompleted());
+        Button clearAllButton = createButton("Clear All Tasks", e -> controller.clearAllTasks());
         
         // Creating layouts for buttons and descriptions
         HBox buttonBox = new HBox(10);
@@ -131,91 +124,10 @@ public class TaskManagerApp extends Application
         primaryStage.setMinWidth(400);
     }
     
-    public void addTask(String title, String description) {
-        // First check if either the title or description given is blank
-        if (title.trim().isEmpty() || description.trim().isEmpty()) {
-            showWarning("Title or description cannot be blank.");
-            return;
-        }
-        
-        // Check if a task already exists with the title
-        boolean titleExists = tasks.stream()
-                .anyMatch(task -> task.getTitle().equalsIgnoreCase(title)
-                        && task.getDescription().equalsIgnoreCase(description));
-
-        
-        if (titleExists) {
-            // Prompt user to confirm if they do/don't want to add another task
-            boolean addAnother = promptToAddAnotherTask();
-            
-            if (!addAnother) {
-                // User has chosen to NOT add a task
-                return;
-            }
-        }
-        // User had decided to add another task with the same name or no task with that name exists
-        Task task = new Task(title, description);
-        tasks.add(task);
-    }
-    
-    public void markTaskAsCompleted() {
-        Task selectedTask = taskTableView.getSelectionModel().getSelectedItem();
-        if (selectedTask != null) {
-            selectedTask.setCompleted(true);
-            taskTableView.refresh();
-        }
-    }
-    
-    public void deleteTask() {
-        Task selectedTask = taskTableView.getSelectionModel().getSelectedItem();
-        if (selectedTask != null) {
-            tasks.remove(selectedTask);
-        }
-    }
-    
-    public void clearAllTasks() {
-        if (!tasks.isEmpty()) {
-            boolean clearAll = promptToClearAllTasks();
-            if (clearAll) {
-                tasks.removeAll(tasks);
-            } else {
-                return;
-            }
-        }
-    }
-    
-    private boolean promptToAddAnotherTask() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Task Exists!");
-        alert.setHeaderText("A task with the same title already exists.");
-        alert.setContentText("Do you want to add another task with the same title?");
-        
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == ButtonType.OK;
-    }
-    
-    private boolean promptToClearAllTasks() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Clear All Tasks");
-        alert.setHeaderText("You are about to delete all tasks listed.");
-        alert.setContentText("Do you want to delete all tasks?");
-
-        // Customize button labels
-        ButtonType yesButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.NO);
-        alert.getButtonTypes().setAll(yesButton, noButton);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == yesButton;
-    }
-
-    
-    private void showWarning(String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Warning");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private Button createButton(String text, EventHandler<ActionEvent> eventHandler) {
+        Button button = new Button(text);
+        button.setOnAction(eventHandler);
+        return button;
     }
     
     private void saveTasksToFile(String fileName) {
@@ -231,7 +143,7 @@ public class TaskManagerApp extends Application
         Gson gson = new Gson();
 
         try {
-            File file = new File("tasks.json");
+            File file = new File(TASKS_FILE_NAME);
 
             if (!file.exists()) {
                 // If the file doesn't exist, create a new one
