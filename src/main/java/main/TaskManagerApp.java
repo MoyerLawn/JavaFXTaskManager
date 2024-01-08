@@ -100,7 +100,7 @@ public class TaskManagerApp extends Application
         TextField descriptionTextField = new TextField();
         descriptionTextField.setPromptText("Task Description");
         
-        Button addButton = createButton("Add Task", e -> controller.addTask(titleTextField.getText(), descriptionTextField.getText()));
+        Button addButton = createButton("Add Task", e -> controller.addTask(titleTextField.getText(), descriptionTextField.getText(), titleTextField, descriptionTextField));
         Button deleteButton = createButton("Delete Task", e -> controller.deleteTask());
         Button markCompletedButton = createButton("Mark as Completed", e -> controller.markTaskAsCompleted());
         Button clearAllButton = createButton("Clear All Tasks", e -> controller.clearAllTasks());
